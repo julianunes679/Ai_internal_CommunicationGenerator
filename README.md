@@ -98,6 +98,14 @@ O sistema é composto por três partes principais:
 - Exportação de mensagens em diferentes formatos  
 - Deploy em ambiente online  
 
+## Observação sobre uso da API
+
+A aplicação utiliza integração com um modelo de linguagem (LLM) via API da OpenAI para geração de mensagens.
+
+Durante testes, a geração pode não ocorrer devido à limitação de cota da API (erro 429 – insufficient_quota). Isso não afeta a implementação da solução, apenas a disponibilidade do serviço externo.
+
+Para funcionamento completo, é necessário configurar uma chave de API válida com crédito disponível.
+
 ## Autora
 
 Júlia Alves Nunes
