@@ -1,59 +1,73 @@
 import streamlit as st
+from openai import OpenAI
+import os
 
-# Configuração da página (mais profissional)
 st.set_page_config(
     page_title="AI Internal Communication Generator",
-    page_icon="💬"
+    page_icon="💬",
+    layout="centered"
 )
 
-# Título e descrição
-st.title("💬 AI Internal Communication Generator")
-st.write("Gere mensagens corporativas automaticamente de forma rápida e eficiente.")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Entradas do usuário
-tipo = st.selectbox(
-    "Tipo de mensagem",
-    ["Aviso", "Lembrete", "Motivacional"]
-)
+st.title("AI Internal Communication Generator")
+st.markdown("Gere mensagens internas automaticamente utilizando IA generativa.")
+
+st.divider()
+
+col1, col2 = st.columns(2)
+
+with col1:
+    tipo = st.selectbox(
+        "Tipo de mensagem",
+        ["Aviso", "Lembrete", "Motivacional"]
+    )
+
+with col2:
+    tom = st.selectbox(
+        "Tom",
+        ["Formal", "Descontraído"]
+    )
 
 tema = st.text_input("Tema da mensagem")
 
-tom = st.selectbox(
-    "Tom da mensagem",
-    ["Formal", "Descontraído"]
-)
-
-# Função que gera a mensagem (simulação de IA)
+# Função com IA real
 def gerar_mensagem(tipo, tema, tom):
 
-    if tom == "Formal":
-        return f"""
-Prezados colaboradores,
+    prompt = f"""
+    Gere uma mensagem interna corporativa.
 
-Gostaríamos de informar um {tipo.lower()} relacionado a {tema}.
+    Tipo: {tipo}
+    Tema: {tema}
+    Tom: {tom}
 
-Pedimos a atenção de todos para garantir o cumprimento das orientações.
+    A mensagem deve ser clara, bem escrita e adequada para colaboradores de uma empresa.
+    Não use linguagem genérica demais. Seja específico e natural.
+    """
 
-Atenciosamente,  
-Equipe
-"""
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "user", "content": prompt}
+        ]
+    )
+
+    return response.choices[0].message.content
+
+if st.button("Gerar mensagem", use_container_width=True):
+
+    if not tema.strip():
+        st.warning("Por favor, digite um tema.")
     else:
-        return f"""
-Fala, pessoal! 
-
-Passando aqui para lembrar sobre {tema}.
-
-Contamos com vocês! Qualquer dúvida, estamos por aqui. 
-"""
-
-# Botão de ação
-if st.button("Gerar mensagem"):
-
-    if tema.strip() == "":
-        st.warning("Por favor, digite um tema antes de gerar a mensagem.")
-    else:
-        mensagem = gerar_mensagem(tipo, tema, tom)
+        with st.spinner("Gerando mensagem com IA..."):
+            mensagem = gerar_mensagem(tipo, tema, tom)
 
         st.success("Mensagem gerada com sucesso!")
-        st.markdown("### 📄 Resultado:")
+        st.markdown("### Resultado")
         st.write(mensagem)
+
+        st.download_button(
+            "Baixar mensagem",
+            mensagem,
+            file_name="mensagem.txt"
+        )
